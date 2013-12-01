@@ -1,0 +1,48 @@
+#!/usr/bin/perl
+#
+
+use LWP::Simple;
+use JSON;
+
+use strict;
+use warnings;
+
+
+#
+# The location of the server we're going to test-against
+#
+my $uri = 'http://localhost:9999/';
+
+#
+#  The data we'll send to the testing service.
+#
+my %data;
+$data{ 'room' }    = 'notices';
+$data{ 'message' } = '<p><a href="http://steve.org.uk/">Steve</a></p>';
+
+
+#
+#  Encode the hash prior to submission.
+#
+#  The server expects JSON.
+#
+my $json = encode_json \%data;
+
+
+#
+#  We're going to use a HTTP POST.
+#
+my $req = HTTP::Request->new( 'POST', $uri );
+$req->header( 'Content-Type' => 'application/json' );
+$req->content($json);
+
+#
+#  Send the request.
+#
+my $lwp      = LWP::UserAgent->new;
+my $response = $lwp->request($req);
+
+#
+#  Show the result which was received.
+#
+print $response->code . " " . $response->decoded_content . "\n";

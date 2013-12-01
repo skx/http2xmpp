@@ -1,0 +1,43 @@
+
+var config = {}
+
+//
+//  The connection details for use by the bot.
+//
+config.username = "bot@chat.example.com";
+config.password = "password";
+
+//
+//  The resource to use for the bot.
+//
+//  (i.e. The name it will present to visitors.)
+//
+config.resource = "bot";
+
+//
+//  The HTTP-POSTS will contain something like this:
+//
+//   { room:"dev", message:"<p><b>build failed</b></p>" }
+//
+//  We need to add the suffix to "dev" to turn it to a conference
+// room, for example "dev@conference.chat.example.com".
+//
+config.room_suffix = "@conference.chat.example.com";
+
+
+//
+// Rooms to join on-startup
+//
+config.rooms = [ "notices", "lobby" ];
+
+
+//
+// The port for the HTTP-server.
+//
+config.port = 9999;
+
+
+//
+// Boiler-plate.
+//
+module.exports = config;
