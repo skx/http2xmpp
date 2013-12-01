@@ -57,7 +57,9 @@ To submit a message via `curl` you can do this:
          -d '{"room":"lobby","message":"I like cake."}' \
          http://localhost:9999/
 
-
+There is [a simple Perl client](client) included within this repository which
+uses the `LWP` module to submit a HTTP-request.  Languages such as ruby would
+allow equally trivial submission(s).
 
 Steve
 --
