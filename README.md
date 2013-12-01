@@ -61,5 +61,14 @@ There is [a simple Perl client](client) included within this repository which
 uses the `LWP` module to submit a HTTP-request.  Languages such as ruby would
 allow equally trivial submission(s).
 
+
+Notes
+-----
+
+* The chat-server and the HTTP bridge/proxy do not need to be running on
+the same host - providing the bridge machine can talk to the chat
+server all will be well.
+
+
 Steve
 --
