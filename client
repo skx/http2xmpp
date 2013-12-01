@@ -1,6 +1,16 @@
 #!/usr/bin/perl
 #
+#  Simple Perl client to submit a JSON-encoded chat-message.
+#
+#  The room and message may be specified on the command-line,
+# but if they are omitted sensible values will be used.
+#
+# Steve
+#
 
+
+
+use Getopt::Long;
 use LWP::Simple;
 use JSON;
 
@@ -8,17 +18,36 @@ use strict;
 use warnings;
 
 
-#
-# The location of the server we're going to test-against
-#
-my $uri = 'http://localhost:9999/';
 
 #
-#  The data we'll send to the testing service.
+#  The defaults.
+#
+my %CONFIG;
+$CONFIG{ 'server' }  = "http://localhost:9999/";
+$CONFIG{ 'room' }    = "notices";
+$CONFIG{ 'message' } = "<p>I am <a href=\"http://steve.org.uk/\">Steve</a></p>";
+
+
+#
+#  Parse the command-line, exiting on errors.
+#
+exit
+  if (
+    !Getopt::Long::GetOptions(
+
+        # Help options
+        "server=s",  \$CONFIG{ 'server' },
+        "room=s",    \$CONFIG{ 'room' },
+        "message=s", \$CONFIG{ 'message' } ) );
+
+
+
+#
+#  The data we'll convert to JSON and POST.
 #
 my %data;
-$data{ 'room' }    = 'notices';
-$data{ 'message' } = '<p><a href="http://steve.org.uk/">Steve</a></p>';
+$data{ 'room' }    = $CONFIG{ 'room' };
+$data{ 'message' } = $CONFIG{ 'message' };
 
 
 #
@@ -32,7 +61,7 @@ my $json = encode_json \%data;
 #
 #  We're going to use a HTTP POST.
 #
-my $req = HTTP::Request->new( 'POST', $uri );
+my $req = HTTP::Request->new( 'POST', $CONFIG{ 'server' } );
 $req->header( 'Content-Type' => 'application/json' );
 $req->content($json);
 
