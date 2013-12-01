@@ -1,5 +1,5 @@
-HTTP to Jabber Bridge
----------------------
+node.js HTTP to Jabber Bridge
+-----------------------------
 
 This repository contains a simple bridge between HTTP and Jabber.
 
