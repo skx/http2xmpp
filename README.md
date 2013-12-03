@@ -3,24 +3,25 @@ node.js HTTP to Jabber Bridge
 
 This repository contains a simple bridge between HTTP and Jabber.
 
-The code listens for HTTP-POST requests, and decodes the body from the
-submitted JSON.
+The node.js server listens for HTTP-POST requests, then submits their
+contents to a XMPP/Jabber server.  Effectively this is a proxy/bridge
+between HTTP and XMPP.
 
 It is assumed incoming requests will contain two things:
 
 * The name of a chat-room.
    * The room name will be _unqualifed_.  (i.e. "`dev`" rather than "`dev@conference.chat.example.com`".)
-* A message.
+* The message to submit.
    * The message may contain HTML-formatting.
 
-When the submission is received it will be posted to the given chat-room.
+When the submission is received it will be posted to the specified chat-room.
 
 
 Rationale
 ---------
 
 I have several systems which usually notify me by email, however dealing
-with email is a pain.  I'd much rather see chat-messages when a backups
+with email is a pain.  I'd much rather see chat-messages when a backup
 starts, or finish, for example.
 
 There are several existing command-line tools which will poke messages
@@ -44,7 +45,8 @@ Installation
 
 * Start the server: `node html2xmpp.js`.
 
-* Submit a message: `perl client`.
+* Submit a message as a test.
+   * There are some simple examples in the `examples` directory.
 
 
 Example
@@ -57,9 +59,8 @@ To submit a message via `curl` you can do this:
          -d '{"room":"lobby","message":"I like cake."}' \
          http://localhost:9999/
 
-There is [a simple Perl client](client) included within this repository which
-uses the `LWP` module to submit a HTTP-request.  Languages such as ruby would
-allow equally trivial submission(s).
+This sample is included in the [sample client](examples) directory within
+this repository, as a simple reference.
 
 
 Notes
@@ -68,7 +69,8 @@ Notes
 * The chat-server and the HTTP bridge/proxy do not need to be running on
 the same host - providing the bridge machine can talk to the chat
 server all will be well.
-
+* The bridge will join a number of conference-rooms when it launches.
+   * Messages sent to unknown rooms will be ignored.
 
 Steve
 --
