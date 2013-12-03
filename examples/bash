@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+# Send a message given on the command-line to the chat-server, via a HTTP
+# post.
+#
+# Steve
+#
+
+#
+# Defaults
+#
+SERVER=http://chat.steve.org.uk:9999/
+ROOM=notices
+
+#
+# Get the message
+#
+if [ -z "$*" ]; then
+    echo "Usage: $0 message to send to chat.."
+    exit 1
+fi
+
+#
+#  Send the message
+#
+curl --silent \
+    -X POST  \
+    -H "Content-Type: application/json" \
+    -d "{\"room\":\"$ROOM\",\"message\":\"$*\"}" \
+    $SERVER
