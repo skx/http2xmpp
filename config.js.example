@@ -1,5 +1,9 @@
-
+//
+// Boiler-plate setup.
+//
 var config = {}
+
+
 
 //
 //  The connection details for use by the bot.
@@ -10,34 +14,39 @@ config.password = "password";
 //
 //  The resource to use for the bot.
 //
-//  (i.e. The name it will present to visitors.)
+//  (i.e. The name it will present to visitors via the presence.)
 //
 config.resource = "bot";
+
 
 //
 //  The HTTP-POSTS will contain something like this:
 //
 //   { room:"dev", message:"<p><b>build failed</b></p>" }
 //
-//  We need to add the suffix to "dev" to turn it to a conference
+//  We need to add the suffix to the name to turn it to a conference
 // room, for example "dev@conference.chat.example.com".
 //
 config.room_suffix = "@conference.chat.example.com";
 
 
 //
-// Rooms to join on-startup
+// Rooms to join on-startup.
+//
+// Attempting to post a message to a room which isn't listed here
+// will result in the client receiving a 404 error, and the message
+// being silently discarded.
 //
 config.rooms = [ "notices", "lobby" ];
 
 
 //
-// The port for the HTTP-server.
+// The port to listen upon for HTTP-requests.
 //
 config.port = 9999;
 
 
 //
-// Boiler-plate.
+// Boiler-plate export.
 //
 module.exports = config;
