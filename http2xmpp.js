@@ -94,6 +94,23 @@ var server = http.createServer(function (request, response) {
                     params.msg = "[" + parsed['peer'] + "] " + parsed['message'];
 
                     //
+                    //  If the room isn't in our config array then
+                    // we know we can't send to it - because of a
+                    // missing presence.
+                    //
+                    //  In that case return a 404.
+                    //
+                    if ( config.rooms.indexOf( parsed['room'] ) < 0 )
+                    {
+                        response.writeHead(404, {'content-type': 'text/plain' });
+                        response.write( "Room found in config");
+                        response.end();
+
+                        console.log( "Ignoring message to unknown room " + parsed['room'] + ":" + parsed['message'] );
+                        return;
+                    }
+
+                    //
                     //  Send the message.
                     //
                     cl.send('<message to="' + params.to + '" type="groupchat"> <body>' + params.msg + '</body><html xmlns="http://jabber.org/protocol/xhtml-im"><body xmlns="http://www.w3.org/1999/xhtml">' + params.msg + ' </body></html></message>')
