@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# This is a run-script for deamon-tools.  It assumes this
+# whole directory is checked out beneath /etc/service.
+#
+# Attempt to launch the script.
+#
+#
+
+
+#
+#  Is this a sv-controlled host?  If not this script is futile
+#
+if ( ! which sv >/dev/null ) ; then
+    echo "sv not found.  This probably isn't a daemon-tools controlled host"
+    exit 0
+fi
+
+#
+#  Setup a PATH.
+#
+#  NOTE: /opt/node is preferred
+#
+PATH=/opt/node/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+#
+#  If we found node then launch the script
+#
+if ( which node >/dev/null ) ; then
+    exec node http2xmpp.js
+else
+    echo "Failed to find 'node' on the PATH"
+    echo "$PATH"
+    exit 0
+fi
+
+
