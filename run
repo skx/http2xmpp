@@ -23,6 +23,20 @@ fi
 #
 PATH=/opt/node/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+
+#
+# Update our code
+#
+git pull --update --quiet
+
+
+#
+# Install missing modules, if we should
+#
+if [ -e "package.json" ]; then
+    npm install
+fi
+
 #
 #  If we found node then launch the script
 #
