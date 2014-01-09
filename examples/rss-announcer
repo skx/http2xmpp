@@ -15,7 +15,7 @@
 #
 # Dependencies:
 #
-#  apt-get install libxml-feed-perl libwww-perl libredis-perl
+#  apt-get install libxml-feed-perl libwww-perl libredis-perl libjson-perl
 #
 #
 # Steve
