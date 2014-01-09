@@ -26,10 +26,13 @@
 use strict;
 use warnings;
 
+use Getopt::Long;
 use JSON;
 use LWP::Simple;
 use Redis;
 use XML::Feed;
+
+
 
 #
 # Config data.
@@ -40,6 +43,11 @@ $CONFIG{ 'room' }      = "feeds";
 $CONFIG{ 'cache' }     = ( 60 * 60 * 24 * 14 );      # cache for two weeks.
 $CONFIG{ 'verbose' }   = 0;
 
+
+#
+# Parse the arguments, looking for --verbose
+#
+exit if ( !GetOptions( "verbose", \$CONFIG{ 'verbose' } ) );
 
 #
 #  Connect to redis, which is used for caching purposes.
@@ -89,7 +97,6 @@ sub processFeed
 {
     my ($url) = (@_);
 
-    $CONFIG{ 'verbose' } && print "Handling: $url\n";
 
     #
     #  Find/Parse the feed.
@@ -98,21 +105,38 @@ sub processFeed
       die XML::Feed->errstr;
 
 
-    $CONFIG{ 'verbose' } && print "\tTitle: " . $feed->title . "\n";
-    $CONFIG{ 'verbose' } && print "\tLink : " . $feed->link . "\n";
+    my $title = $feed->title || "";
+
+    $CONFIG{ 'verbose' } && print "\nHandling: $url [$title]\n";
 
     #
     #  For each entry.
     #
     for my $entry ( $feed->entries )
     {
-        $CONFIG{ 'verbose' } && print "Found entry: " . $entry->title . "\n";
+
+        #
+        #  The data we care about
+        #
+        my $title  = $entry->title;
+        my $author = $entry->author || "unknown";
+        my $link   = $entry->link;
+
+        #
+        #  If we don't have all the data then we ignore this entry.
+        #
+        next unless ( $title && $author && $link );
+
+        #
+        # Show details
+        #
+        $CONFIG{ 'verbose' } && print "- $link -> $title\n";
 
         #
         #  Post it to the chatroom, unless we saw it already.
         #
-        sendMessage( $entry->link, $entry->title, $entry->author )
-          unless ( seen( $entry->link ) );
+        sendMessage( $link, $title, $author )
+          unless ( seen($link) );
     }
 }
 
@@ -133,6 +157,9 @@ sub sendMessage
     $data{ 'room' } = $CONFIG{ 'room' };
     $data{ 'message' } =
       "<p>A new entry was posted by $author <a href=\"$link\">$title</a></p>";
+
+    $CONFIG{ 'verbose' } && print "- Announcing to room: $CONFIG{'room'}\n";
+
 
     #
     #  Encode the hash prior to submission.
@@ -167,12 +194,10 @@ sub seen
 
     if ( $redis->get($url) )
     {
-        $CONFIG{ 'verbose' } && print "Seen URL: $url\n";
         return 1;
     }
     else
     {
-        $CONFIG{ 'verbose' } && print "NEW URL : $url\n";
 
         #
         # Cache feed entries for two weeks.
