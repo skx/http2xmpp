@@ -1,0 +1,196 @@
+#!/usr/bin/perl -w
+#
+# Given a list of RSS/Atom blog-feeds post each new entry to our
+# chatroom, via a HTTP POST to http2xmpp.
+#
+# We keep a local cache of the blog-entries we've seen before and
+# avoid resubmitting them.
+#
+# This code assumes two things:
+#
+#  1. http2xmpp is running on the localhost.
+#
+#  2. There is a local redis server also on the same host.
+#
+#
+# Dependencies:
+#
+#  apt-get install libxml-feed-perl libwww-perl libredis-perl
+#
+#
+# Steve
+# --
+#
+
+
+use strict;
+use warnings;
+
+use JSON;
+use LWP::Simple;
+use Redis;
+use XML::Feed;
+
+#
+# Config data.
+#
+my %CONFIG;
+$CONFIG{ 'http2xmpp' } = "http://localhost:9999/";
+$CONFIG{ 'room' }      = "feeds";
+$CONFIG{ 'cache' }     = ( 60 * 60 * 24 * 14 );      # cache for two weeks.
+$CONFIG{ 'verbose' }   = 0;
+
+
+#
+#  Connect to redis, which is used for caching purposes.
+#
+my $redis = new Redis;
+
+
+#
+#  Read the URLs from our DATA section, or our config file if present
+#
+if ( -e "/etc/rss-announcer.conf" )
+{
+    open( my $handle, "<", "/etc/rss-announcer.conf" ) or
+      die "Failed to open config";
+    while ( my $line = <$handle> )
+    {
+        chomp($line);
+        next if ( $line =~ /^#/ );
+
+        processFeed($line);
+    }
+    close($handle);
+}
+else
+{
+    while ( my $list = <DATA> )
+    {
+        chomp($list);
+        next if ( $list =~ /^#/ );
+
+        processFeed($list);
+    }
+}
+
+
+#
+#  All done.
+#
+exit 0;
+
+
+
+#
+# Process the feed at the given URL.
+#
+sub processFeed
+{
+    my ($url) = (@_);
+
+    $CONFIG{ 'verbose' } && print "Handling: $url\n";
+
+    #
+    #  Find/Parse the feed.
+    #
+    my $feed = XML::Feed->parse( URI->new($url) ) or
+      die XML::Feed->errstr;
+
+
+    $CONFIG{ 'verbose' } && print "\tTitle: " . $feed->title . "\n";
+    $CONFIG{ 'verbose' } && print "\tLink : " . $feed->link . "\n";
+
+    #
+    #  For each entry.
+    #
+    for my $entry ( $feed->entries )
+    {
+        $CONFIG{ 'verbose' } && print "Found entry: " . $entry->title . "\n";
+
+        #
+        #  Post it to the chatroom, unless we saw it already.
+        #
+        sendMessage( $entry->link, $entry->title, $entry->author )
+          unless ( seen( $entry->link ) );
+    }
+}
+
+
+#
+#  Post a link about the blog entry to the chat-room
+#
+sub sendMessage
+{
+    my ( $link, $title, $author ) = (@_);
+
+    $author = "unknown" unless ($author);
+
+    #
+    #  The entry we'll post
+    #
+    my %data;
+    $data{ 'room' } = $CONFIG{ 'room' };
+    $data{ 'message' } =
+      "<p>A new entry was posted by $author <a href=\"$link\">$title</a></p>";
+
+    #
+    #  Encode the hash prior to submission.
+    #
+    #  The server expects JSON.
+    #
+    my $json = encode_json \%data;
+
+    my $req = HTTP::Request->new( 'POST', $CONFIG{ 'http2xmpp' } );
+    $req->header( 'Content-Type' => 'application/json' );
+    $req->content($json);
+
+    #
+    #  Send the request.
+    #
+    my $lwp      = LWP::UserAgent->new;
+    my $response = $lwp->request($req);
+
+}
+
+
+#
+# Have we seen this entry?
+#
+# Just a simple Redis lookup.
+#
+# If we haven't seen it then record it, with a sane TTL.
+#
+sub seen
+{
+    my ($url) = (@_);
+
+    if ( $redis->get($url) )
+    {
+        $CONFIG{ 'verbose' } && print "Seen URL: $url\n";
+        return 1;
+    }
+    else
+    {
+        $CONFIG{ 'verbose' } && print "NEW URL : $url\n";
+
+        #
+        # Cache feed entries for two weeks.
+        #
+        $redis->set( $url, 1 );
+        $redis->expire( $url, $CONFIG{ 'cache' } );
+        return 0;
+    }
+}
+
+#
+#  The URLs we'll post.
+#
+#  This is just a sample set, add your URLs to /etc/rss-announcer.conf
+#
+__DATA__
+#
+# Comments are good.
+#
+http://blog.mythic-beasts.com/feed/
+http://blog.bytemark.co.uk/feed
