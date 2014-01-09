@@ -63,6 +63,16 @@ This sample is included in the [sample client](examples) directory within
 this repository, as a simple reference.
 
 
+RSS Bot
+-------
+
+Included within this repository is a simple tool to poll a bunch of RSS
+feeds.  Each new entry will be posted to a dedicated "feeds" room, if it
+exists, via a simple HTTP POST to the server.
+
+The example is called [rss-announcer](examples/rss-announcer).
+
+
 Notes
 -----
 
