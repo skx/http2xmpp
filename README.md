@@ -10,7 +10,7 @@ between HTTP and XMPP.
 It is assumed incoming requests will contain two things:
 
 * The name of a chat-room.
-   * The room name will be _unqualifed_.  (i.e. "`dev`" rather than "`dev@conference.chat.example.com`".)
+   * The room name will be _unqualified_.  (i.e. "`dev`" rather than "`dev@conference.chat.example.com`".)
 * The message to submit.
    * The message may contain HTML-formatting.
 
