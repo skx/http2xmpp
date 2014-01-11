@@ -103,10 +103,10 @@ var server = http.createServer(function (request, response) {
                     if ( config.rooms.indexOf( parsed['room'] ) < 0 )
                     {
                         response.writeHead(404, {'content-type': 'text/plain' });
-                        response.write( "Room found in config");
+                        response.write( "Room not found in config:" + parsed['room'] );
                         response.end();
 
-                        console.log( "Ignoring message to unknown room " + parsed['room'] + ":" + parsed['message'] );
+                        console.log( "Ignoring message sent to unknown room " + parsed['room'] + ":" + parsed['message'] );
                         return;
                     }
 
