@@ -52,7 +52,7 @@ exit if ( !GetOptions( "verbose", \$CONFIG{ 'verbose' } ) );
 #
 # UTF8 is the future.
 #
-$CONFIG{'verbose'} && binmode( STDOUT, ":utf8" );
+$CONFIG{'verbose'} && binmode( STDOUT, ":encoding(UTF-8)" );
 
 #
 #  Connect to redis, which is used for caching purposes.
