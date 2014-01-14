@@ -106,9 +106,14 @@ sub processFeed
     #
     #  Find/Parse the feed.
     #
-    my $feed = XML::Feed->parse( URI->new($url) ) or
-      die XML::Feed->errstr;
+    my $feed = XML::Feed->parse( URI->new($url) );
 
+    if ( ! $feed )
+    {
+        print "WARNING: Failed to parse/process URL: $url";
+        $CONFIG{'verbose'} && print "WARNING: " .  XML::Feed->errstr;
+        return;
+    }
 
     my $title = $feed->title || "";
 
