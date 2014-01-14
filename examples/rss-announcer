@@ -52,7 +52,7 @@ exit if ( !GetOptions( "verbose", \$CONFIG{ 'verbose' } ) );
 #
 # UTF8 is the future.
 #
-$CONFIG{'verbose'} && binmode( STDOUT, ":encoding(UTF-8)" );
+$CONFIG{ 'verbose' } && binmode( STDOUT, ":encoding(UTF-8)" );
 
 #
 #  Connect to redis, which is used for caching purposes.
@@ -108,10 +108,10 @@ sub processFeed
     #
     my $feed = XML::Feed->parse( URI->new($url) );
 
-    if ( ! $feed )
+    if ( !$feed )
     {
         print "WARNING: Failed to parse/process URL: $url";
-        $CONFIG{'verbose'} && print "WARNING: " .  XML::Feed->errstr;
+        $CONFIG{ 'verbose' } && print "WARNING: " . XML::Feed->errstr;
         return;
     }
 
