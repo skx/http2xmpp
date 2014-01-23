@@ -40,7 +40,7 @@ use XML::Feed;
 my %CONFIG;
 $CONFIG{ 'http2xmpp' } = "http://localhost:9999/";
 $CONFIG{ 'room' }      = "feeds";
-$CONFIG{ 'cache' }     = ( 60 * 60 * 24 * 14 );      # cache for two weeks.
+$CONFIG{ 'cache' }     = ( 60 * 60 * 24 * 30 * 4 );      # cache for 4 months.
 $CONFIG{ 'verbose' }   = 0;
 
 
