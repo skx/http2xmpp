@@ -4,7 +4,7 @@
 # chatroom, via a HTTP POST to http2xmpp.
 #
 # We keep a local cache of the blog-entries we've seen before and
-# avoid resubmitting them.
+# avoid resubmitting them.  By default the cache is set to one year.
 #
 # This code assumes two things:
 #
@@ -40,8 +40,11 @@ use XML::Feed;
 my %CONFIG;
 $CONFIG{ 'http2xmpp' } = "http://localhost:9999/";
 $CONFIG{ 'room' }      = "feeds";
-$CONFIG{ 'cache' }     = ( 60 * 60 * 24 * 30 * 4 );      # cache for 4 months.
 $CONFIG{ 'verbose' }   = 0;
+
+# cache period is expressed in periods of different units.  For example
+# 1h (one hour), 1d (one day), 1m (one month), and 1y (one year).
+$CONFIG{ 'cache' } = "1y";
 
 
 #
@@ -210,10 +213,43 @@ sub seen
     {
 
         #
-        # Cache feed entries for two weeks.
+        # Convert the cache-period from h/d/w/m/y into the appropriate
+        # number of seconds.
+        #
+        my $seconds = $CONFIG{ 'cache' };
+        if ( $seconds =~ /^([0-9]+)h/i )
+        {
+            $seconds = $1 * ( 60 * 60 );
+        }
+        elsif ( $seconds =~ /^([0-9]+)d/i )
+        {
+            $seconds = $1 * ( 60 * 60 * 24 );
+        }
+        elsif ( $seconds =~ /^([0-9]+)m/i )
+        {
+
+            # avering a month to be 31 days.
+            $seconds = $1 * ( 60 * 60 * 24 * 31 );
+        }
+        elsif ( $seconds =~ /^([0-9]+)y/i )
+        {
+
+            # avering a year to be 365 days.
+            $seconds = $1 * ( 60 * 60 * 24 * 365 );
+        }
+        else
+        {
+            print "WARNING: Unknown cache-period: $CONFIG{'cache'}\n";
+        }
+
+        $CONFIG{ 'verbose' } &&
+          print $CONFIG{ 'cache' } . " -> $seconds seconds\n";
+
+        #
+        # Cache the feed entries for the given time-period.
         #
         $redis->set( $url, 1 );
-        $redis->expire( $url, $CONFIG{ 'cache' } );
+        $redis->expire( $url, $seconds );
         return 0;
     }
 }
