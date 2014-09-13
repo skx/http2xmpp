@@ -263,5 +263,10 @@ __DATA__
 #
 # Comments are good.
 #
-http://blog.mythic-beasts.com/feed/
 http://blog.bytemark.co.uk/feed
+http://blog.mythic-beasts.com/feed/
+http://blogs.msdn.com/b/oldnewthing/atom.aspx
+http://planet.debian.org/rss20.xml
+http://syndication.thedailywtf.com/TheDailyWtf
+http://youarenotaphotographer.com/feed/
+http://perf.fail/rss
