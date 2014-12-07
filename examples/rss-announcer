@@ -107,13 +107,20 @@ sub processFeed
 
 
     #
-    #  Find/Parse the feed.
+    # The parsed feed entries.
     #
-    my $feed = XML::Feed->parse( URI->new($url) );
+    my $feed = undef;
 
-    if ( !$feed )
+    #
+    # Try to parse the contents.
+    #
+    eval {$feed = XML::Feed->parse( URI->new($url) );};
+
+    if ( $@ || !$feed )
     {
         print "WARNING: Failed to parse/process URL: $url";
+        print "WARNING: $@\n" if ($@);
+
         $CONFIG{ 'verbose' } && print "WARNING: " . XML::Feed->errstr;
         return;
     }
