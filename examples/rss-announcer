@@ -12,6 +12,9 @@
 #
 #  2. There is a local redis server also on the same host.
 #
+# If the configuration file contains a room it will be used to send to
+# instead of just the default.
+#
 #
 # Dependencies:
 #
@@ -39,8 +42,10 @@ use XML::Feed;
 #
 my %CONFIG;
 $CONFIG{ 'http2xmpp' } = "http://localhost:9999/";
-$CONFIG{ 'room' }      = "feeds";
 $CONFIG{ 'verbose' }   = 0;
+
+# Default room.
+$CONFIG{ 'room' } = "feeds";
 
 # cache period is expressed in periods of different units.  For example
 # 1h (one hour), 1d (one day), 1m (one month), and 1y (one year).
@@ -74,7 +79,7 @@ if ( -e "/etc/rss-announcer.conf" )
     {
         chomp($line);
         next if ( $line =~ /^#/ );
-
+        next if ( $line =~ /^$/ );
         processFeed($line);
     }
     close($handle);
@@ -85,6 +90,7 @@ else
     {
         chomp($list);
         next if ( $list =~ /^#/ );
+        next if ( $list =~ /^$/ );
 
         processFeed($list);
     }
@@ -103,8 +109,23 @@ exit 0;
 #
 sub processFeed
 {
-    my ($url) = (@_);
+    my ($line) = (@_);
 
+    my $url;
+    my $rooms;
+
+    #
+    #  The line will either contain a list of rooms, and a URL, or just a URL:
+    #
+    if ( $line =~ /^([^ \t]+)[ \t]+(.*)$/ )
+    {
+        $url   = $2;
+        $rooms = $1;
+    }
+    else
+    {
+        $url = $line;
+    }
 
     #
     # The parsed feed entries.
@@ -155,8 +176,25 @@ sub processFeed
         #
         #  Post it to the chatroom, unless we saw it already.
         #
-        sendMessage( $link, $title, $author )
-          unless ( seen($link) );
+        if ( !seen($link) )
+        {
+            if ($rooms)
+            {
+                foreach my $r ( split( /,/, $rooms ) )
+                {
+                    $r =~ s/^\s+//;
+                    $r =~ s/\s+$//;
+                    next unless ($r);
+
+                    sendMessage( $link, $title, $author, $r );
+
+                }
+            }
+            else
+            {
+                sendMessage( $link, $title, $author, $CONFIG{ 'room' } );
+            }
+        }
     }
 }
 
@@ -166,7 +204,7 @@ sub processFeed
 #
 sub sendMessage
 {
-    my ( $link, $title, $author ) = (@_);
+    my ( $link, $title, $author, $room ) = (@_);
 
     $author = "unknown" unless ($author);
 
@@ -174,7 +212,7 @@ sub sendMessage
     #  The entry we'll post
     #
     my %data;
-    $data{ 'room' } = $CONFIG{ 'room' };
+    $data{ 'room' } = $room;
     $data{ 'message' } =
       "<p>A new entry was posted by $author <a href=\"$link\">$title</a></p>";
 
@@ -197,9 +235,7 @@ sub sendMessage
     #
     my $lwp      = LWP::UserAgent->new;
     my $response = $lwp->request($req);
-
 }
-
 
 #
 # Have we seen this entry?
