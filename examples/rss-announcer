@@ -142,7 +142,12 @@ sub processFeed
         print "WARNING: Failed to parse/process URL: $url\n";
         print "WARNING: $@\n" if ($@);
 
-        $CONFIG{ 'verbose' } && print "WARNING: " . XML::Feed->errstr;
+        my $error = XML::Feed->errstr();
+
+        if ( $error && $CONFIG{ 'verbose' } )
+        {
+            print "WARNING: " . $error . "\n";
+        }
         return;
     }
 
