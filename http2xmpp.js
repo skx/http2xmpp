@@ -20,10 +20,11 @@
 
 
 //
-// Require Jabber and HTTP libraries..
+// Require the various NPM libraries.
 //
 var xmpp = require("node-xmpp");
 var http = require("http");
+var esch = require("escape-html");
 
 
 //
@@ -113,7 +114,7 @@ var server = http.createServer(function (request, response) {
                     //
                     //  Send the message.
                     //
-                    cl.send('<message to="' + params.to + '" type="groupchat"> <body>' + params.msg + '</body><html xmlns="http://jabber.org/protocol/xhtml-im"><body xmlns="http://www.w3.org/1999/xhtml">' + params.msg + ' </body></html></message>')
+                    cl.send('<message to="' + params.to + '" type="groupchat"> <body>' + esch(params.msg) + '</body><html xmlns="http://jabber.org/protocol/xhtml-im"><body xmlns="http://www.w3.org/1999/xhtml">' + params.msg + ' </body></html></message>')
                     //
                     //  Log to the console too.
                     //
